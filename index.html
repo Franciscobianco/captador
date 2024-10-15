@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captador de Palabras en Guaraní</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #terminal {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            height: 150px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Captador de Palabras en Guaraní</h1>
+    <button id="start-btn">Iniciar Reconocimiento de Voz</button>
+    <button id="stop-btn">Detener Reconocimiento</button>
+    <div id="output"></div>
+    <div id="terminal"></div>
+
+    <audio id="existing-word-sound" src="path/to/existing-word-sound.mp3"></audio>
+    <audio id="new-word-sound" src="path/to/new-word-sound.mp3"></audio>
+
+    <script>
+        const guaraniWords = new Set([
+            "rehegua", "che", "kyhyhea", "opa", "aña", 
+            "mbohapy", "aguara", "oñemby", "oñe", "po", 
+            "numpy", "pa"
+        ]);
+        const startButton = document.getElementById('start-btn');
+        const stopButton = document.getElementById('stop-btn');
+        const outputDiv = document.getElementById('output');
+        const terminalDiv = document.getElementById('terminal');
+
+        let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'es-ES';
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+            const spokenWord = event.results[0][0].transcript.trim().toLowerCase();
+            handleWord(spokenWord);
+        };
+
+        recognition.onerror = (event) => {
+            logToTerminal(`Error al intentar captar: ${event.error}`);
+        };
+
+        startButton.addEventListener('click', () => {
+            recognition.start();
+            outputDiv.innerHTML = "Escuchando...";
+            logToTerminal("Reconocimiento de voz iniciado.");
+        });
+
+        stopButton.addEventListener('click', () => {
+            recognition.stop();
+            outputDiv.innerHTML = "Reconocimiento detenido.";
+            logToTerminal("Reconocimiento de voz detenido.");
+        });
+
+        function handleWord(word) {
+            if (guaraniWords.has(word)) {
+                document.getElementById('existing-word-sound').play();
+                outputDiv.innerHTML = `Palabra clave captada: ${word}`;
+                logToTerminal(`Se captó la palabra clave: ${word}`);
+            } else {
+                outputDiv.innerHTML = `Palabra no reconocida: ${word}`;
+                logToTerminal(`Palabra no reconocida: ${word}`);
+            }
+        }
+
+        function logToTerminal(message) {
+            terminalDiv.innerHTML += message + "<br>";
+            terminalDiv.scrollTop = terminalDiv.scrollHeight; // Desplazar hacia abajo
+        }
+    </script>
+</body>
+</html>
